@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect
 import requests
 from datetime import datetime
 import os
@@ -31,11 +31,20 @@ def track_and_redirect():
 # Function to get geolocation information based on the user's IP
 def get_geolocation(ip):
     try:
+        # Attempt to use ipinfo.io API to get geolocation
         response = requests.get(f'https://ipinfo.io/{ip}/json')
+        print(f"Geolocation Response: {response.text}")  # Log the response for debugging
         data = response.json()
-        # Return city and country
-        return data.get('city', 'Unknown') + ', ' + data.get('country', 'Unknown')
+        
+        # Check for city and country in the response
+        city = data.get('city', 'Unknown')
+        country = data.get('country', 'Unknown')
+        
+        # Return city and country in a readable format
+        return f"{city}, {country}"
     except Exception as e:
+        # Log and return an error message if geolocation fails
+        print(f"Error in getting location: {str(e)}")
         return 'Error getting location'
 
 # Function to log the request information
