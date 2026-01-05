@@ -1,26 +1,32 @@
-from flask import Flask, request
+from flask import Flask, request, redirect, url_for
 import requests
 from datetime import datetime
 import os
 
 app = Flask(__name__)
 
-# Route for the base URL ('/')
-@app.route('/')
-def home():
-    # Get the user's IP address and user agent
+# Route for the fake tracking link that will redirect the user
+@app.route('/track-and-redirect', methods=['GET'])
+def track_and_redirect():
+    # Extract the destination URL from the query parameter
+    destination_url = request.args.get('destination')
+
+    if not destination_url:
+        return "No destination URL provided.", 400
+
+    # Get the user's IP and user agent
     user_ip = request.remote_addr
     user_agent = request.headers.get('User-Agent')
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Get geolocation data based on IP
+    # Get the geolocation based on the user's IP
     location = get_geolocation(user_ip)
 
-    # Log the request with IP, user-agent, and location
+    # Log the request details
     log_request(user_ip, user_agent, timestamp, location)
 
-    # Return the information directly in the response
-    return f"Tracking successful!<br>IP: {user_ip}<br>User Agent: {user_agent}<br>Location: {location}<br>Timestamp: {timestamp}", 200
+    # Redirect the user to the real destination URL
+    return redirect(destination_url)
 
 # Function to get geolocation information based on the user's IP
 def get_geolocation(ip):
