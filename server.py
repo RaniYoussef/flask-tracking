@@ -2,15 +2,15 @@ from flask import Flask, request
 import requests
 from datetime import datetime
 import os
-from urllib.parse import quote as url_quote  # Corrected import
 
 app = Flask(__name__)
 
-# Route for tracking the image access
-@app.route('/track', methods=['GET'])
-def track():
-    user_ip = request.remote_addr  # Get the user's IP address
-    user_agent = request.headers.get('User-Agent')  # Get the user agent (browser info)
+# Route for the base URL ('/')
+@app.route('/')
+def home():
+    # Get the user's IP address and user agent
+    user_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent')
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Get geolocation data based on IP
@@ -19,7 +19,8 @@ def track():
     # Log the request with IP, user-agent, and location
     log_request(user_ip, user_agent, timestamp, location)
 
-    return "Tracking successful!", 200
+    # Return the information directly in the response
+    return f"Tracking successful!<br>IP: {user_ip}<br>User Agent: {user_agent}<br>Location: {location}<br>Timestamp: {timestamp}", 200
 
 # Function to get geolocation information based on the user's IP
 def get_geolocation(ip):
@@ -37,6 +38,6 @@ def log_request(ip, user_agent, timestamp, location):
     with open("logs.txt", "a") as f:
         f.write(f"{timestamp} - IP: {ip}, User Agent: {user_agent}, Location: {location}\n")
 
-# Run the Flask app
+# Run the Flask app (dynamic port for deployment)
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))  # Port 5000 for local testing
